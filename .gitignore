@@ -14,5 +14,8 @@ buildNumber.properties
 *.iml
 .DS_Store
 
+# Test credentials - keep sample but ignore local overrides
+src/test/resources/credentials.properties
+
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar

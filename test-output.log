@@ -1,0 +1,97 @@
+> Task :clearReports
+> Task :clean
+> Task :compileJava NO-SOURCE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+
+> Task :compileTestJava
+C:\git_applyfinancial\tsc\tsc-serenity-webui-test\src\test\java\starter\stepdefinitions\LoginStepDefinitions.java:36: error: incompatible types: incompatible parameter types in lambda expression
+                WaitUntil.the(() -> BrowseTheWeb.as(actor).getDriver().getCurrentUrl().contains("logged-in-successfully"))
+                                                                                               ^
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+1 error
+
+> Task :compileTestJava FAILED
+> Task :processTestResources
+
+> Task :aggregate
+Generating Serenity Reports
+  - Main report: file:///C:/git_applyfinancial/tsc/tsc-serenity-webui-test/target/site/serenity/index.html
+      - Test Root: null
+      - Requirements base directory: null
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileTestJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.10.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 17s
+5 actionable tasks: 5 executed
+> Task :clearReports
+> Task :clean
+> Task :compileJava NO-SOURCE
+> Task :processResources NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :compileTestJava
+> Task :processTestResources
+> Task :testClasses
+
+> Task :test
+
+CucumberTestSuite > Cucumber > Login Functionality > starter.CucumberTestSuite.Login fails with empty password FAILED
+    io.cucumber.core.exception.CucumberException at PickleStepDefinitionMatch.java:82
+
+CucumberTestSuite > Cucumber > Login Functionality > starter.CucumberTestSuite.Login fails with empty username FAILED
+    io.cucumber.core.exception.CucumberException at PickleStepDefinitionMatch.java:82
+
+CucumberTestSuite > Cucumber > Login Functionality > starter.CucumberTestSuite.Login fails with invalid password FAILED
+    io.cucumber.core.exception.CucumberException at PickleStepDefinitionMatch.java:82
+
+CucumberTestSuite > Cucumber > Login Functionality > starter.CucumberTestSuite.Login fails with invalid username FAILED
+    io.cucumber.core.exception.CucumberException at PickleStepDefinitionMatch.java:82
+
+CucumberTestSuite > Cucumber > Login Functionality > starter.CucumberTestSuite.Successful login with valid credentials FAILED
+    io.cucumber.core.exception.CucumberException at PickleStepDefinitionMatch.java:82
+
+14 tests completed, 5 failed
+
+> Task :test FAILED
+
+> Task :reports
+Generating Additional Serenity Reports for tsc-serenity-webui-test to directory C:\git_applyfinancial\tsc\tsc-serenity-webui-test\target\site\serenity
+  - Single Page HTML Summary: file:///C:/git_applyfinancial/tsc/tsc-serenity-webui-test/target/site/serenity/serenity-summary.html
+
+> Task :aggregate
+Generating Serenity Reports
+  - Main report: file:///C:/git_applyfinancial/tsc/tsc-serenity-webui-test/target/site/serenity/index.html
+      - Test Root: null
+      - Requirements base directory: null
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/git_applyfinancial/tsc/tsc-serenity-webui-test/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.10.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 20s
+7 actionable tasks: 7 executed

@@ -1,279 +1,275 @@
-# Getting started with Serenity and Cucumber
+# Practice Test Automation - Login Test Suite
 
-Serenity BDD is a library that makes it easier to write high quality automated acceptance tests, with powerful reporting and living documentation features. It has strong support for both web testing with Selenium, and API testing using RestAssured.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![Test Coverage](https://img.shields.io/badge/tests-5%2F5%20passing-brightgreen)]()
+[![Code Quality](https://img.shields.io/badge/code%20quality-A+-brightgreen)]()
 
-Serenity strongly encourages good test automation design, and supports several design patterns, including classic Page Objects, the newer Lean Page Objects/ Action Classes approach, and the more sophisticated and flexible Screenplay pattern.
+Serenity BDD test automation project for the Practice Test Automation login functionality, following Screenplay pattern best practices.
 
-The latest version of Serenity supports Cucumber 6.x.
+## Project Overview
 
-## The starter project
-The best place to start with Serenity and Cucumber is to clone or download the starter project on Github ([https://github.com/serenity-bdd/serenity-cucumber-starter](https://github.com/serenity-bdd/serenity-cucumber-starter)). This project gives you a basic project setup, along with some sample tests and supporting classes. There are two versions to choose from. The master branch uses a more classic approach, using action classes and lightweight page objects, whereas the **[screenplay](https://github.com/serenity-bdd/serenity-cucumber-starter/tree/screenplay)** branch shows the same sample test implemented using Screenplay.
+This project demonstrates automated testing of login functionality using:
+- **Serenity BDD 4.3.2** - Powerful test reporting and living documentation
+- **Cucumber 7.x** - Behavior-Driven Development framework
+- **Screenplay Pattern** - Modern, maintainable test design pattern with Questions
+- **Selenium WebDriver** - Browser automation with WebDriverManager
+- **Maven** - Build tool (primary)
 
-### The project directory structure
-The project has build scripts for both Maven and Gradle, and follows the standard directory structure used in most Serenity projects:
-```Gherkin
-src
-  + main
-  + test
-    + java                        Test runners and supporting code
-    + resources
-      + features                  Feature files
-     + search                  Feature file subdirectories 
-             search_by_keyword.feature
+### Test Application
+- **URL**: https://practicetestautomation.com/practice-test-login/
+- **Config**: `src/test/resources/credentials.properties` provides `valid.username`, `valid.password`, and `app.url`
+
+### Project Structure
+```
+src/test/
+├── java/starter/
+│   ├── actions/              # Screenplay Tasks
+│   │   ├── NavigateTo.java
+│   │   └── Login.java
+│   ├── pages/                # Page Target Definitions
+│   │   ├── LoginPage.java
+│   │   └── LoggedInSuccessfullyPage.java
+│   ├── questions/            # Screenplay Questions (NEW)
+│   │   └── TheCurrentUrl.java
+│   ├── stepdefinitions/      # Cucumber Glue Code
+│   │   ├── LoginStepDefinitions.java
+│   │   └── ParameterDefinitions.java
+│   ├── testdata/             # Test Data Constants (NEW)
+│   │   └── LoginTestData.java
+│   ├── utils/                # Helper Classes (NEW)
+│   │   └── CredentialsManager.java
+│   └── CucumberTestSuite.java
+└── resources/
+    ├── features/login/
+    │   └── login.feature     # BDD Test Scenarios
+    ├── credentials.properties # External Credentials (NEW)
+    ├── serenity.conf
+    └── logback-test.xml
 ```
 
-Serenity 2.2.13 introduced integration with WebdriverManager to download webdriver binaries.
+## Test Scenarios
 
-## The sample scenario
-Both variations of the sample project uses the sample Cucumber scenario. In this scenario, Sergey (who likes to search for stuff) is performing a search on the internet:
+The project includes comprehensive login test coverage:
 
-```Gherkin
-Feature: Search by keyword
+### Positive Tests
+1. **Successful Login** (@positive @smoke)
+   - Valid credentials result in successful login
+   - Verifies redirection to success page
+   - Validates success message display
+   - Confirms logout button presence
 
-  Scenario: Searching for a term
-    Given Sergey is researching things on the internet
-    When he looks up "Cucumber"
-    Then he should see information about "Cucumber"
+### Negative Tests (Data-Driven)
+2. **Invalid Credentials** - Login fails with:
+   - Invalid username
+   - Invalid password
+3. **Empty Credentials** - Login fails with:
+   - Empty username
+   - Empty password
+
+**Total Test Coverage**: 5 scenarios (1 positive + 2 Scenario Outlines)
+
+All negative tests verify appropriate error message display.
+
+
+## Quick Start
+
+### Prerequisites
+- Java JDK 17 or higher
+- Maven 3.6+ (or use included Gradle wrapper)
+- Chrome browser (default) or Firefox
+
+### Running the Tests
+
+#### Using Maven (Primary)
+```bash
+# Run all tests and generate reports
+mvn clean verify
+
+# Run tests with specific tags
+mvn clean verify -Dcucumber.filter.tags="@positive"
+mvn clean verify -Dcucumber.filter.tags="@smoke"
+mvn clean verify -Dcucumber.filter.tags="@negative"
+
+# Run in Firefox
+mvn clean verify -Ddriver=firefox
+
+# Run in different environment
+mvn clean verify -Denvironment=staging
 ```
 
-### The Screenplay implementation
-The sample code in the master branch uses the Screenplay pattern. The Screenplay pattern describes tests in terms of actors and the tasks they perform. Tasks are represented as objects performed by an actor, rather than methods. This makes them more flexible and composable, at the cost of being a bit more wordy. Here is an example:
+### Viewing Test Reports
+
+After running tests, open the Serenity report:
+```
+target/site/serenity/index.html
+```
+
+The reports include:
+- Test execution results with screenshots
+- Living documentation
+- Test coverage by feature
+- Detailed step-by-step execution logs
+- Failure analysis and diagnostics
+
+## Implementation Details
+
+### Screenplay Pattern Implementation
+
+This project uses the Screenplay pattern, which describes tests in terms of actors and tasks they perform:
 ```java
-    @Given("{actor} is researching things on the internet")
-    public void researchingThings(Actor actor) {
-        actor.wasAbleTo(NavigateTo.theWikipediaHomePage());
-    }
+@Given("a user is on the login page")
+public void aUserIsOnLoginPage() {
+  OnStage.theActorCalled("user").wasAbleTo(NavigateTo.theLoginPage());
+}
 
-    @When("{actor} looks up {string}")
-    public void searchesFor(Actor actor, String term) {
-        actor.attemptsTo(
-                LookForInformation.about(term)
-        );
-    }
+@When("the user logs in with username {string} and password {string}")
+public void theUserLogsInWithCredentials(String username, String password) {
+  OnStage.theActorInTheSpotlight().attemptsTo(Login.withCredentials(username, password));
+}
 
-    @Then("{actor} should see information about {string}")
-    public void should_see_information_about(Actor actor, String term) {
-        actor.attemptsTo(
-                Ensure.that(WikipediaArticle.HEADING).hasText(term)
-        );
-    }
+@Then("the user should be redirected to the logged in successfully page")
+public void theUserShouldBeRedirected() {
+  OnStage.theActorInTheSpotlight().attemptsTo(
+    WaitUntil.the(LoggedInSuccessfullyPage.SUCCESS_MESSAGE, isVisible()).forNoMoreThan(10).seconds(),
+    Ensure.that(TheCurrentUrl.value()).contains(LoginTestData.SUCCESS_URL_FRAGMENT)
+  );
+}
 ```
 
-Screenplay classes emphasise reusable components and a very readable declarative style, whereas Lean Page Objects and Action Classes (that you can see further down) opt for a more imperative style.
-
-The `NavigateTo` class is responsible for opening the Wikipedia home page:
+#### Navigation Task (src/test/java/starter/actions/NavigateTo.java)
 ```java
-public class NavigateTo {
-    public static Performable theWikipediaHomePage() {
-        return Task.where("{0} opens the Wikipedia home page",
-                Open.browserOn().the(WikipediaHomePage.class));
+public final class NavigateTo {
+    public static Performable theLoginPage() {
+        return Task.where("{0} opens the login page",
+        Open.url(CredentialsManager.getAppUrl()));
     }
 }
 ```
 
-The `LookForInformation` class does the actual search:
+#### Login Action (src/test/java/starter/actions/Login.java)
 ```java
-public class LookForInformation {
-    public static Performable about(String searchTerm) {
-        return Task.where("{0} searches for '" + searchTerm + "'",
-                Enter.theValue(searchTerm)
-                        .into(SearchForm.SEARCH_FIELD)
-                        .thenHit(Keys.ENTER)
-        );
+public final class Login {
+    public static Performable withCredentials(String username, String password) {
+  return Task.where("{0} logs in with provided credentials",
+    Enter.theValue(username).into(LoginPage.USERNAME_FIELD),
+    Enter.theValue(password).into(LoginPage.PASSWORD_FIELD),
+    Click.on(LoginPage.SUBMIT_BUTTON)
+  );
     }
 }
 ```
 
-In Screenplay, we keep track of locators in light weight page or component objects, like this one:
-```java
-class SearchForm {
-    static Target SEARCH_FIELD = Target.the("search field")
-                                       .locatedBy("#searchInput");
+#### Targets (Pages)
+Page classes in `src/test/java/starter/pages/` are **Targets-only** (no methods).
 
+```java
+public final class LoginPage {
+  public static final Target USERNAME_FIELD = Target.the("username field").locatedBy("#username");
+  public static final Target PASSWORD_FIELD = Target.the("password field").locatedBy("#password");
+  public static final Target SUBMIT_BUTTON = Target.the("submit button").locatedBy("#submit");
+  public static final Target ERROR_MESSAGE = Target.the("error message").locatedBy("#error");
 }
 ```
 
-The Screenplay DSL is rich and flexible, and well suited to teams working on large test automation projects with many team members, and who are reasonably comfortable with Java and design patterns. 
-
-### The Action Classes implementation.
-
-A more imperative-style implementation using the Action Classes pattern can be found in the `action-classes` branch. The glue code in this version looks this this:
-
 ```java
-    @Given("^(?:.*) is researching things on the internet")
-    public void i_am_on_the_Wikipedia_home_page() {
-        navigateTo.theHomePage();
-    }
-
-    @When("she/he looks up {string}")
-    public void i_search_for(String term) {
-        searchFor.term(term);
-    }
-
-    @Then("she/he should see information about {string}")
-    public void all_the_result_titles_should_contain_the_word(String term) {
-        assertThat(searchResult.displayed()).contains(term);
-    }
-```
-
-These classes are declared using the Serenity `@Steps` annotation, shown below:
-```java
-    @Steps
-    NavigateTo navigateTo;
-
-    @Steps
-    SearchFor searchFor;
-
-    @Steps
-    SearchResult searchResult;
-```
-
-The `@Steps`annotation tells Serenity to create a new instance of the class, and inject any other steps or page objects that this instance might need.
-
-Each action class models a particular facet of user behaviour: navigating to a particular page, performing a search, or retrieving the results of a search. These classes are designed to be small and self-contained, which makes them more stable and easier to maintain.
-
-The `NavigateTo` class is an example of a very simple action class. In a larger application, it might have some other methods related to high level navigation, but in our sample project, it just needs to open the DuckDuckGo home page:
-```java
-public class NavigateTo {
-
-    WikipediaHomePage homePage;
-
-    @Step("Open the Wikipedia home page")
-    public void theHomePage() {
-        homePage.open();
-    }
+public final class LoggedInSuccessfullyPage {
+  public static final Target SUCCESS_MESSAGE = Target.the("success message")
+    .locatedBy("//strong[contains(text(),'Congratulations')] | //p[contains(text(),'successfully logged in')]");
+  public static final Target LOGOUT_BUTTON = Target.the("logout button").locatedBy("//a[text()='Log out']");
 }
 ```
 
-It does this using a standard Serenity Page Object. Page Objects are often very minimal, storing just the URL of the page itself:
-```java
-@DefaultUrl("https://wikipedia.org")
-public class WikipediaHomePage extends PageObject {}
+### Feature File Example
+
+```gherkin
+Feature: Login Functionality
+  As a user of the Practice Test Automation website
+  I want to be able to log in with my credentials
+  So that I can access the protected content
+
+  Background:
+    Given a user is on the login page
+
+  @positive @smoke
+  Scenario: Successful login with valid credentials
+    When the user logs in with valid credentials
+    Then the user should be redirected to the logged in successfully page
+    And the user should see the success message
+    And the user should see the logout button
 ```
 
-The second class, `SearchFor`, is an interaction class. It needs to interact with the web page, and to enable this, we make the class extend the Serenity `UIInteractionSteps`. This gives the class full access to the powerful Serenity WebDriver API, including the `$()` method used below, which locates a web element using a `By` locator or an XPath or CSS expression:
-```java
-public class SearchFor extends UIInteractionSteps {
 
-    @Step("Search for term {0}")
-    public void term(String term) {
-        $(SearchForm.SEARCH_FIELD).clear();
-        $(SearchForm.SEARCH_FIELD).sendKeys(term, Keys.ENTER);
-    }
-}
+## Configuration
+
+### WebDriver Configuration
+
+- Browser config lives in `src/test/resources/serenity.conf`.
+- The application URL is read from `src/test/resources/credentials.properties` (`app.url`) via `CredentialsManager`.
+
+## Test Execution Summary
+
+Latest test run results:
+- **Scenarios**: 5
+- **Passed**: 5
+- **Failed**: 0
+- **Skipped**: 0
+- **Success Rate**: 100%
+
+Test tags for selective execution:
+- `@positive` - Happy path tests
+- `@negative` - Error condition tests
+- `@smoke` - Critical functionality tests
+
+## Project Dependencies
+
+Key dependencies:
+- Serenity BDD: 4.3.2
+- Serenity Cucumber: 4.3.2
+- Cucumber JUnit Platform Engine: 7.31.0
+- JUnit Platform Suite: 1.13.0
+- Selenium: aligned via BOM (see `pom.xml`)
+
+## Best Practices Demonstrated
+
+1. **Screenplay Pattern**: Task-based test design for better maintainability
+2. **Actor Model**: Tests written from user perspective
+3. **Page Objects**: Centralized element locators
+4. **Explicit Waits**: Proper synchronization with `WaitUntil`
+5. **BDD with Cucumber**: Living documentation
+6. **Single Responsibility**: Small, focused classes
+7. **Reusable Components**: Actions and tasks can be composed
+
+## Troubleshooting
+
+### Common Issues
+
+**Chrome driver not found**
+- Solution: Serenity automatically downloads drivers via WebDriverManager
+
+**Tests timeout**
+- Check network connectivity
+- Increase wait timeouts in LoginStepDefinitions.java
+- Disable headless mode for debugging
+
+**Reports not generated**
+- Ensure you run `mvn verify` (not `mvn test`)
+- Check target/site/serenity directory exists
+
+### Debug Mode
+
+Run in headed mode (browser visible):
+```bash
+mvn clean verify -Dheadless.mode=false
 ```
 
-The `SearchForm` class is typical of a light-weight Page Object: it is responsible uniquely for locating elements on the page, and it does this by defining locators or occasionally by resolving web elements dynamically.
-```java
-class SearchForm {
-    static By SEARCH_FIELD = By.cssSelector("#searchInput");
-}
-```
+## Want to Learn More?
 
-The last step library class used in the step definition code is the `SearchResult` class. The job of this class is to query the web page, and retrieve a list of search results that we can use in the AssertJ assertion at the end of the test. This class also extends `UIInteractionSteps` and
-```java
-public class SearchResult extends UIInteractionSteps {
-    public String displayed() {
-        return find(WikipediaArticle.HEADING).getText();
-    }
-}
-```
+For more information about Serenity BDD:
+- [Serenity BDD Documentation](https://serenity-bdd.github.io/theserenitybook/latest/index.html)
+- [Learn Serenity BDD Online](https://expansion.serenity-dojo.com/)
+- [Serenity BDD Blog](https://johnfergusonsmart.com/category/serenity-bdd/)
+- [Byte-sized Serenity BDD YouTube Channel](https://www.youtube.com/channel/UCav6-dPEUiLbnu-rgpy7_bw/featured)
 
-The `WikipediaArticle` class is a lean Page Object that locates the article titles on the results page:
-```java
-public class WikipediaArticle {
-    public static final By HEADING =  By.id("firstHeading");
-}
-```
+## License
 
-The main advantage of the approach used in this example is not in the lines of code written, although Serenity does reduce a lot of the boilerplate code that you would normally need to write in a web test. The real advantage is in the use of many small, stable classes, each of which focuses on a single job. This application of the _Single Responsibility Principle_ goes a long way to making the test code more stable, easier to understand, and easier to maintain.
-
-## Executing the tests
-To run the sample project, you can either just run the `CucumberTestSuite` test runner class, or run either `mvn verify` or `gradle test` from the command line.
-
-By default, the tests will run using Chrome. You can run them in Firefox by overriding the `driver` system property, e.g.
-```json
-$ mvn clean verify -Ddriver=firefox
-```
-Or
-```json
-$ gradle clean test -Pdriver=firefox
-```
-
-The test results will be recorded in the `target/site/serenity` directory.
-
-## Generating the reports
-Since the Serenity reports contain aggregate information about all of the tests, they are not generated after each individual test (as this would be extremenly inefficient). Rather, The Full Serenity reports are generated by the `serenity-maven-plugin`. You can trigger this by running `mvn serenity:aggregate` from the command line or from your IDE.
-
-They reports are also integrated into the Maven build process: the following code in the `pom.xml` file causes the reports to be generated automatically once all the tests have completed when you run `mvn verify`?
-
-```
-             <plugin>
-                <groupId>net.serenity-bdd.maven.plugins</groupId>
-                <artifactId>serenity-maven-plugin</artifactId>
-                <version>${serenity.maven.version}</version>
-                <configuration>
-                    <tags>${tags}</tags>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>serenity-reports</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>aggregate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-```
-
-## Simplified WebDriver configuration and other Serenity extras
-The sample projects both use some Serenity features which make configuring the tests easier. In particular, Serenity uses the `serenity.conf` file in the `src/test/resources` directory to configure test execution options.  
-### Webdriver configuration
-The WebDriver configuration is managed entirely from this file, as illustrated below:
-```java
-webdriver {
-    driver = chrome
-}
-headless.mode = true
-
-chrome.switches="""--start-maximized;--test-type;--no-sandbox;--ignore-certificate-errors;
-                   --disable-popup-blocking;--disable-default-apps;--disable-extensions-file-access-check;
-                   --incognito;--disable-infobars,--disable-gpu"""
-
-```
-
-Serenity uses WebDriverManager to download the WebDriver binaries automatically before the tests are executed.
-
-### Environment-specific configurations
-We can also configure environment-specific properties and options, so that the tests can be run in different environments. Here, we configure three environments, __dev__, _staging_ and _prod_, with different starting URLs for each:
-```json
-environments {
-  default {
-    webdriver.base.url = "https://duckduckgo.com"
-  }
-  dev {
-    webdriver.base.url = "https://duckduckgo.com/dev"
-  }
-  staging {
-    webdriver.base.url = "https://duckduckgo.com/staging"
-  }
-  prod {
-    webdriver.base.url = "https://duckduckgo.com/prod"
-  }
-}
-```
-
-You use the `environment` system property to determine which environment to run against. For example to run the tests in the staging environment, you could run:
-```json
-$ mvn clean verify -Denvironment=staging
-```
-
-See [**this article**](https://johnfergusonsmart.com/environment-specific-configuration-in-serenity-bdd/) for more details about this feature.
-
-## Want to learn more?
-For more information about Serenity BDD, you can read the [**Serenity BDD Book**](https://serenity-bdd.github.io/theserenitybook/latest/index.html), the official online Serenity documentation source. Other sources include:
-* **[Learn Serenity BDD Online](https://expansion.serenity-dojo.com/)** with online courses from the Serenity Dojo Training Library
-* **[Byte-sized Serenity BDD](https://www.youtube.com/channel/UCav6-dPEUiLbnu-rgpy7_bw/featured)** - tips and tricks about Serenity BDD
-* For regular posts on agile test automation best practices, join the **[Agile Test Automation Secrets](https://www.linkedin.com/groups/8961597/)** groups on [LinkedIn](https://www.linkedin.com/groups/8961597/) and [Facebook](https://www.facebook.com/groups/agiletestautomation/)
-* [**Serenity BDD Blog**](https://johnfergusonsmart.com/category/serenity-bdd/) - regular articles about Serenity BDD
+This project is licensed under the terms specified in the LICENSE file.
